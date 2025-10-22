@@ -47,7 +47,7 @@ mod_select_atom_server <- function(id, atoms){
       # Build named choices: names shown, values submitted
       # (values must be character for selectInput)
       vals   <- as.character(atoms()[["eleno"]])
-      labs   <- paste0(atoms()[["elena"]], ": ", atoms()[["eleno"]])
+      labs   <- paste0(atoms()[["elena"]], " (", atoms()[["eleno"]], ")")
       choices <- stats::setNames(vals, labs)
 
       # Preserve selection if still valid, otherwise choose first
