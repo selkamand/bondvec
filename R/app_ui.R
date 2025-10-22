@@ -19,17 +19,18 @@ app_ui <- function(request) {
         mod_select_atom_ui(id = "mod_select_atom_c", label = "Select atom C"),
         mod_select_atom_ui(id = "mod_select_atom_b", label = "Select atom B"),
         mod_select_atom_ui(id = "mod_select_atom_a", label = "Select atom A"),
+        verbatimTextOutput(outputId = "out_dpos"),
         verbatimTextOutput(outputId = "brushinfo")
       ),
       bslib::nav_panel(
         title = "Compute Bond Vector",
         bslib::card(
           bslib::card_header("Structure Viewer"),
-          fluidRow(height = "50px",
+          fluidRow(
+            height = "50px",
             col_2(selectInput(inputId = "in_sel_labels", label = "Label mode: ", choices = c("None" = "none", "No Atoms" = "no_atoms", "Transparent" = "transparent"), selected = "none")),
             col_2(selectInput(inputId = "in_sel_label_column", label = "Labels", choices = c("Name" = "name", "ID" = "id", "Name & ID" = "name_and_id"), selected = "Name"))
           ),
-
           rgl::rglwidgetOutput(outputId = "out_rgl_structure", width = "100%")
         )
       ),
@@ -44,7 +45,6 @@ app_ui <- function(request) {
           DT::dataTableOutput(outputId = "out_dt_bonds"),
         )
       )
-
     )
   )
 }
