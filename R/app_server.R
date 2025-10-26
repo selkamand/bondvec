@@ -24,15 +24,7 @@ app_server <- function(input, output, session) {
   atom_id_b <- mod_select_atom_server(id = "mod_select_atom_b", atoms)
   atom_id_a <- mod_select_atom_server(id = "mod_select_atom_a", atoms)
 
-  # TODO: Visualise dummy position on rgl plot (Note could be NAN
-  computed_dummy_atom_position <- reactive({
-#
-#     validate(need(atoms, message = "Please supply atoms"))
-#     validate(need(atom_id_a, message = "Please supply atom_id_a"))
-#     validate(need(atom_id_b, message = "Please supply atom_id_b"))
-#     validate(need(atom_id_c, message = "Please supply atom_id_c"))
-#     validate(need(atom_id_d, message = "Please supply atom_id_d"))
-
+  computed_abcd_dihedral_stats <- reactive({
 
     d <- as.numeric(atoms()[atoms()$eleno == atom_id_d(), c("x", "y", "z")])
     c <- as.numeric(atoms()[atoms()$eleno == atom_id_c(), c("x", "y", "z")])
@@ -40,9 +32,16 @@ app_server <- function(input, output, session) {
     a <- as.numeric(atoms()[atoms()$eleno == atom_id_a(), c("x", "y", "z")])
 
     stats <- tryCatch({move::compute_abcd_dihedral_stats(a = a, b = b, c = c, d=d)}, error = function(err){NULL})
+    return(stats)
+  })
+  # TODO: Visualise dummy position on rgl plot (Note could be NAN
+  computed_dummy_atom_position <- reactive({
+
+    stats <- computed_abcd_dihedral_stats()
     if(is.null(stats)) return(NULL)
+
     d_position <- move::locate_fourth_atom_position(
-      a = a, b=b, c=c,
+      a = stats$a, b=stats$b, c=stats$c,
       bond_angle=stats$bond_angle,
       bond_length = stats$bond_length,
       torsion_angle = stats$torsion_angle,
@@ -53,7 +52,26 @@ app_server <- function(input, output, session) {
     return(d_position)
   })
 
-  output$out_dpos <- renderPrint({computed_dummy_atom_position()})
+  # Render computed dihedral stats
+  output$out_dpos <- renderPrint({
+    stats <- computed_abcd_dihedral_stats()
+    if(is.null(stats)) return(NULL)
+
+    pos <- computed_dummy_atom_position()
+
+    bond_angle = stats$bond_angle
+    bond_length  = stats$bond_length
+    torsion_angle = stats$torsion_angle
+
+
+    glue::glue(
+      "
+      Bond Angle: {bond_angle}
+      Bond Length: {bond_length}
+      Torsion Angle: {bond_angle}
+      "
+    )
+  })
 
   #
 
@@ -92,8 +110,8 @@ app_server <- function(input, output, session) {
         atoms = atoms(),
         bonds = bonds(),
         colour_map_atom = chemviewR::element_colours,
-        highlight = atom_id_d(),
-        highlight_colour = "green",
+        highlight = c(atom_id_d(), atom_id_c(), atom_id_b(), atom_id_a()),
+        highlight_colour = c("green"),
         label_mode = input$in_sel_labels,
         col_label = label_column(),
         atom_alpha_when_labelled = 0.2,
@@ -105,8 +123,14 @@ app_server <- function(input, output, session) {
 
       dummy_pos <- computed_dummy_atom_position()
       if(!is.null(dummy_pos) && !anyNA(dummy_pos)) {
-        message("rendering")
-        rgl::spheres3d(x = dummy_pos[1], y = dummy_pos[2], z = dummy_pos[3], radius = 0.1, color = "purple")
+        message("rendering dummy atom")
+        rgl::wire3d(
+          rgl::translate3d(
+            rgl::scale3d(rgl::dodecahedron3d(col = "purple"), 0.5, 0.5, 0.5),
+            dummy_pos[1], dummy_pos[2], dummy_pos[3]
+          ), lit=FALSE
+        )
+        # rgl::spheres3d(x = dummy_pos[1], y = dummy_pos[2], z = dummy_pos[3], radius = 0.1, color = "purple")
       }
 
       # 4) capture to widget

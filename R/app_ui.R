@@ -28,8 +28,8 @@ app_ui <- function(request) {
           bslib::card_header("Structure Viewer"),
           fluidRow(
             height = "50px",
-            col_2(selectInput(inputId = "in_sel_labels", label = "Label mode: ", choices = c("None" = "none", "No Atoms" = "no_atoms", "Transparent" = "transparent"), selected = "none")),
-            col_2(selectInput(inputId = "in_sel_label_column", label = "Labels", choices = c("Name" = "name", "ID" = "id", "Name & ID" = "name_and_id"), selected = "Name"))
+            col_2(selectInput(inputId = "in_sel_labels", label = "Label mode: ", choices = c("None" = "none", "No Atoms" = "no_atoms", "Transparent" = "transparent"), selected = "transparent")),
+            col_2(selectInput(inputId = "in_sel_label_column", label = "Labels", choices = c("Name" = "name", "ID" = "id", "Name & ID" = "name_and_id"), selected = "name_and_id"))
           ),
           rgl::rglwidgetOutput(outputId = "out_rgl_structure", width = "100%")
         )
